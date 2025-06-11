@@ -7,7 +7,8 @@ import { useRouter } from 'next/navigation' // Corrected import
 import FeeManager from '@/components/admin/fee-manager'
 import ExpenseManager from '@/components/admin/expense-manager'
 import PaymentsViewer from '@/components/admin/payments-viewer'
-import FinancialSummary from '@/components/admin/financial-summary' // Added import
+import FinancialSummary from '@/components/admin/financial-summary'
+import EventManager from '@/components/admin/event-manager' // Added import
 
 export default function AdminDashboardPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -81,9 +82,12 @@ export default function AdminDashboardPage() {
         <div className="md:col-span-2">
           <PaymentsViewer />
         </div>
-        {/* FinancialSummary component integrated here, spanning two columns */}
         <div className="md:col-span-2">
           <FinancialSummary />
+        </div>
+        {/* EventManager component integrated here, spanning two columns */}
+        <div className="md:col-span-2 mt-6"> {/* Added mt-6 for spacing like other blocks */}
+          <EventManager />
         </div>
       </div>
     </div>

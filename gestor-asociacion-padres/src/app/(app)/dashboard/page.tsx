@@ -6,7 +6,8 @@ import { supabase } from '@/lib/supabaseClient'
 import { User } from '@supabase/supabase-js'
 import Link from 'next/link' // For navigation links
 import FeeStatus from '@/components/parent/fee-status'
-import { initiatePayment } from '@/lib/payment-integration' // Added import
+import { initiatePayment } from '@/lib/payment-integration'
+import EventViewer from '@/components/parent/event-viewer' // Added import
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -75,20 +76,14 @@ export default function DashboardPage() {
     setLoading(false);
   };
 
-  // Placeholder handler for the new button
   const handlePayFees = async () => {
-    // In a real scenario, you'd gather actual fee details.
-    // This might involve iterating over `feeStatuses` from the `FeeStatus` component (if lifted up or fetched here)
-    // or making a new query to find outstanding fees for the user.
-    // For this placeholder, we use static details.
     const placeholderPaymentDetails = {
-      feeId: 1, // Example fee ID
-      studentId: 1, // Example student ID (needs to be dynamic)
-      amount: 5000, // Example amount in cents (e.g., $50.00)
+      feeId: 1,
+      studentId: 1,
+      amount: 5000,
       currency: "usd",
       description: "Placeholder Annual Fee Payment"
     };
-    // Include parentId and parentEmail if available and needed by your payment logic
     if (user) {
       // @ts-ignore
       placeholderPaymentDetails.parentId = user.id;
@@ -98,10 +93,8 @@ export default function DashboardPage() {
 
     const result = await initiatePayment(placeholderPaymentDetails);
     if (result.success) {
-      // Handle success (e.g., navigation handled by Stripe, or show message)
       console.log(result.message);
     } else {
-      // Handle failure from placeholder (e.g., show error message)
       alert(result.message || "Payment initiation failed.");
     }
   };
@@ -126,7 +119,6 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-transparent">
           <FeeStatus />
-          {/* Placeholder "Pay Fee" button added below FeeStatus */}
           <div className="mt-4">
             <Button onClick={handlePayFees} variant="primary" disabled={loading}>
               Pay Outstanding Fees (Placeholder)
@@ -134,9 +126,9 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="p-6 border rounded-lg shadow bg-white">
-          <h2 className="text-xl font-semibold mb-3">Upcoming Events</h2>
-          <p className="text-gray-600">(Event notifications will appear here - Coming Soon)</p>
+        {/* EventViewer component integrated here */}
+        <div className="bg-transparent"> {/* Container for EventViewer */}
+          <EventViewer />
         </div>
 
         <div className="p-6 border rounded-lg shadow bg-white">
