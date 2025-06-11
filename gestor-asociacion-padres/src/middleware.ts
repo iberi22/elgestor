@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr' // Needs manual npm install @supabase/ssr
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
@@ -17,65 +17,42 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          })
+          // Update request cookies for current processing
+          request.cookies.set({ name, value, ...options })
+          // Prepare response to set the cookie
+          response = NextResponse.next({ request: { headers: request.headers } })
+          response.cookies.set({ name, value, ...options })
         },
         remove(name: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
+          request.cookies.set({ name, value: '', ...options })
+          response = NextResponse.next({ request: { headers: request.headers } })
+          response.cookies.set({ name, value: '', ...options })
         },
       },
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user
 
-  // Define protected routes (e.g., everything in an '(app)' group or specific paths)
-  // For this milestone, let's protect '/profile' and a future '/dashboard'
-  const protectedPaths = ['/profile', '/dashboard'] // Add more as needed
-  const isAdminPath = request.nextUrl.pathname.startsWith('/admin')
+  const { pathname } = request.nextUrl
 
-  // If user is not signed in and the current path is protected
-  if (!user && protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))) {
+  // Define protected routes that require login
+  // (app) group routes like /profile, /dashboard, /admin/*
+  const isAppRoute = pathname.startsWith('/profile') || pathname.startsWith('/dashboard') || pathname.startsWith('/admin')
+
+  // If user is not signed in and trying to access a protected app route
+  if (!user && isAppRoute) {
     return NextResponse.redirect(new URL('/signin', request.url))
   }
 
   // If user is signed in, but tries to access auth pages like signin/signup, redirect to dashboard
-  if (user && (request.nextUrl.pathname.startsWith('/signin') || request.nextUrl.pathname.startsWith('/signup'))) {
-    return NextResponse.redirect(new URL('/dashboard', request.url)) // Assuming '/dashboard' is the main page after login
+  if (user && (pathname.startsWith('/signin') || pathname.startsWith('/signup'))) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // Role-based protection for admin routes (basic example)
-  // This requires 'role' to be available in user's metadata or a separate 'profiles' table
-  if (user && isAdminPath) {
+  // Admin route protection
+  if (user && pathname.startsWith('/admin')) {
     const { data: profile, error } = await supabase
       .from('profiles')
       .select('role')
@@ -83,9 +60,10 @@ export async function middleware(request: NextRequest) {
       .single()
 
     if (error || !profile || profile.role !== 'admin') {
-      // Redirect to a general access page or show an unauthorized message
-      // For now, let's redirect to dashboard, or a specific 'unauthorized' page if it existed
-      return NextResponse.redirect(new URL('/dashboard?error=unauthorized', request.url))
+      // User is not an admin or profile fetch failed, redirect them.
+      // Redirect to a general dashboard or a specific 'unauthorized' page.
+      // Adding a query param for clarity on client-side if needed.
+      return NextResponse.redirect(new URL('/dashboard?error=admin_unauthorized', request.url))
     }
   }
 
@@ -99,10 +77,10 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
+     * - api (API routes, if any, not explicitly auth-protected by this middleware)
+     * Matcher needs to cover all routes that should pass through middleware.
+     * The logic inside then decides what to do.
      */
-    '/((?!_next/static|_next/image|favicon.ico|auth).*)', // Exclude /auth routes from initial check, handle them specifically
-    '/signin', // Specifically match to redirect if logged in
-    '/signup', // Specifically match to redirect if logged in
+    '/((?!_next/static|_next/image|favicon.ico|api/).*)',
   ],
 }
