@@ -20,9 +20,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [message, setMessage] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-
-  const title = mode === 'signin' ? 'Sign In' : 'Sign Up'
-  const description = mode === 'signin' ? 'Enter your credentials to access your account.' : 'Create a new account.'
+  const title = mode === 'signin' ? 'Iniciar Sesión' : 'Registrarse'
+  const description = mode === 'signin' ? 'Ingresa tus credenciales para acceder a tu cuenta.' : 'Crea una nueva cuenta.'
 
   useEffect(() => {
     // Check if user is already logged in
@@ -126,23 +125,22 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 />
               </div>
             )}
-            <div className="grid w-full items-center gap-1.5 mb-4">
-              <Label htmlFor="email">Email</Label>
+            <div className="grid w-full items-center gap-1.5 mb-4">              <Label htmlFor="email">Correo electrónico</Label>
               <Input
                 type="email"
                 id="email"
-                placeholder="your.email@example.com"
+                placeholder="tu.correo@ejemplo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
             <div className="grid w-full items-center gap-1.5 mb-6">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Contraseña</Label>
               <Input
                 type="password"
                 id="password"
-                placeholder="Your Password"
+                placeholder="Tu Contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -157,10 +155,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
           </form>
         </CardContent>
         <CardFooter className="text-sm">
-          {mode === 'signin' ? (
-            <p>Don&apos;t have an account? <a href="/signup" className="underline">Sign Up</a></p>
+          {mode === 'signin' ? (            <p>¿No tienes una cuenta? <a href="/signup" className="underline">Regístrate</a></p>
           ) : (
-            <p>Already have an account? <a href="/signin" className="underline">Sign In</a></p>
+            <p>¿Ya tienes una cuenta? <a href="/signin" className="underline">Inicia Sesión</a></p>
           )}
         </CardFooter>
       </Card>

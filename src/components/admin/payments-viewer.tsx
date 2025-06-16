@@ -79,25 +79,23 @@ export default function PaymentsViewer() {
 
   return (
     <Card className="md:col-span-2"> {/* Adjusted span to fit typical dashboard layouts */}
-      <CardHeader>
-        <CardTitle>Payments Overview</CardTitle>
-        <CardDescription>List of all payment transactions.</CardDescription>
+      <CardHeader>        <CardTitle>Vista General de Pagos</CardTitle>
+        <CardDescription>Lista de todas las transacciones de pago.</CardDescription>
       </CardHeader>
       <CardContent>
-        {loading && <p>Loading payments...</p>}
+        {loading && <p>Cargando pagos...</p>}
         {error && <p className="text-red-500 mb-4">{error}</p>}
-        {!loading && !error && payments.length === 0 && <p>No payments found.</p>}
+        {!loading && !error && payments.length === 0 && <p>No se encontraron pagos.</p>}
 
         {!loading && !error && payments.length > 0 && (
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Student</TableHead>
-                <TableHead>Fee Year</TableHead>
-                <TableHead>Amount Paid</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Payment Date</TableHead>
-                <TableHead>Transaction ID</TableHead>
+              <TableRow>                <TableHead>Estudiante</TableHead>
+                <TableHead>Año de Cuota</TableHead>
+                <TableHead>Monto Pagado</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Fecha de Pago</TableHead>
+                <TableHead>ID de Transacción</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

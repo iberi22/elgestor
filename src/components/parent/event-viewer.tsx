@@ -100,12 +100,11 @@ export default function EventViewer() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Upcoming Events</CardTitle>
-        <CardDescription>Events relevant to you and your children.</CardDescription>
+      <CardHeader>        <CardTitle>Próximos Eventos</CardTitle>
+        <CardDescription>Eventos relevantes para ti y tus hijos.</CardDescription>
       </CardHeader>
       <CardContent>
-        {upcomingEvents.length === 0 && <p>No upcoming events found for you at this time.</p>}
+        {upcomingEvents.length === 0 && <p>No hay próximos eventos para ti en este momento.</p>}
         {upcomingEvents.length > 0 && (
           <Accordion type="single" collapsible className="w-full">
             {upcomingEvents.map(event => (
@@ -120,7 +119,7 @@ export default function EventViewer() {
                   {event.description ? (
                     <p className="whitespace-pre-wrap">{event.description}</p>
                   ) : (
-                    <p className="text-muted-foreground">No further details provided.</p>
+                    <p className="text-muted-foreground">No hay detalles adicionales.</p>
                   )}
                 </AccordionContent>
               </AccordionItem>

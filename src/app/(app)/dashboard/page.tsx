@@ -108,14 +108,13 @@ export default function DashboardPage() {
           {profileError}
         </div>
       )}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Parent Dashboard</h1>
+      <div className="flex justify-between items-center mb-6">        <h1 className="text-3xl font-bold">Panel de Padres</h1>
         <Button onClick={handleSignOut} variant="outline" disabled={loading}>
-            {loading ? 'Signing out...' : 'Sign Out'}
+            {loading ? 'Cerrando sesión...' : 'Cerrar Sesión'}
         </Button>
       </div>
 
-      <p className="mb-4">Welcome, {user.email}!</p>
+      <p className="mb-4">Bienvenido, {user.email}!</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-transparent">
@@ -132,11 +131,10 @@ export default function DashboardPage() {
           <EventViewer />
         </div>
 
-        <div className="p-6 border rounded-lg shadow bg-white">
-          <h2 className="text-xl font-semibold mb-3">Your Profile</h2>
-          <p className="text-gray-600 mb-3">Manage your children and personal details.</p>
-          <Link href="/profile" legacyBehavior>
-            <a className="text-blue-600 hover:underline">Go to Profile</a>
+        <div className="p-6 border rounded-lg shadow bg-white">          <h2 className="text-xl font-semibold mb-3">Tu Perfil</h2>
+          <p className="text-gray-600 mb-3">Administra tus hijos y datos personales.</p>
+          <Link href="/profile" className="text-blue-600 hover:underline">
+            Ir al Perfil
           </Link>
         </div>
       </div>

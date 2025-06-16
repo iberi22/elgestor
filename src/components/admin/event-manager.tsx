@@ -202,8 +202,7 @@ export default function EventManager() {
     }
   }
 
-  const handleDelete = async (eventId: number, eventTitle: string) => {
-    if (!confirm(`Are you sure you want to delete the event "${eventTitle}"? This action cannot be undone.`)) {
+  const handleDelete = async (eventId: number, eventTitle: string) => {    if (!confirm(`¿Estás seguro que deseas eliminar el evento "${eventTitle}"? Esta acción no se puede deshacer.`)) {
         return;
     }
     setLoading(true); setError(null);
@@ -215,7 +214,7 @@ export default function EventManager() {
       const { error: deleteEventError } = await supabase.from('events').delete().eq('id', eventId);
       if (deleteEventError) throw deleteEventError;
 
-      setMessage(`Event "${eventTitle}" deleted successfully.`);
+      setMessage(`El evento "${eventTitle}" fue eliminado exitosamente.`);
       fetchEvents(); // Refresh list
     } catch (e: unknown) {
        setError(`Error deleting event: ${e instanceof Error ? e.message : 'Unknown error'}`);
@@ -227,17 +226,16 @@ export default function EventManager() {
   return (
     <Card className="md:col-span-2"> {/* Take full width if it's the main content for an /admin/events page, or adjust if part of dashboard */}
       <CardHeader className="flex flex-row items-center justify-between">
-        <div>
-          <CardTitle>Manage Events</CardTitle>
-          <CardDescription>Create, update, and delete school events.</CardDescription>
+        <div>          <CardTitle>Administrar Eventos</CardTitle>
+          <CardDescription>Crear, actualizar y eliminar eventos escolares.</CardDescription>
         </div>
-        <Button onClick={() => handleOpenDialog()}>Add New Event</Button>
+        <Button onClick={() => handleOpenDialog()}>Agregar Nuevo Evento</Button>
       </CardHeader>
       <CardContent>
         {error && <p className="text-red-500 mb-4">{error}</p>}
         {message && <p className="text-green-500 mb-4">{message}</p>}
-        {loading && events.length === 0 && <p>Loading events...</p>}
-        {!loading && events.length === 0 && <p>No events created yet.</p>}
+        {loading && events.length === 0 && <p>Cargando eventos...</p>}
+        {!loading && events.length === 0 && <p>No hay eventos creados aún.</p>}
 
         {events.length > 0 && (
           <Table>
@@ -255,13 +253,12 @@ export default function EventManager() {
                   <TableCell className="font-medium">{event.title}</TableCell>
                   <TableCell>{new Date(event.event_date || '').toLocaleString()}</TableCell>
                   <TableCell>
-                    {event.target_class_ids && event.target_class_ids.length > 0
-                      ? event.target_class_ids.map(id => allClasses.find(c => c.id === id)?.name || `ID ${id}`).join(', ')
-                      : 'All Parents'}
+                    {event.target_class_ids && event.target_class_ids.length > 0                    ? event.target_class_ids.map(id => allClasses.find(c => c.id === id)?.name || `ID ${id}`).join(', ')
+                      : 'Todos los Padres'}
                   </TableCell>
                   <TableCell>
-                    <Button variant="outline" size="sm" onClick={() => handleOpenDialog(event)} className="mr-2">Edit</Button>
-                    <Button variant="destructive" size="sm" onClick={() => event.id && handleDelete(event.id, event.title)} disabled={loading}>Delete</Button>
+                    <Button variant="outline" size="sm" onClick={() => handleOpenDialog(event)} className="mr-2">Editar</Button>
+                    <Button variant="destructive" size="sm" onClick={() => event.id && handleDelete(event.id, event.title)} disabled={loading}>Eliminar</Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -271,26 +268,24 @@ export default function EventManager() {
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="sm:max-w-[625px]"> {/* Wider dialog for class list */}
-            <DialogHeader>
-              <DialogTitle>{currentEvent?.id ? 'Edit Event' : 'Add New Event'}</DialogTitle>
+            <DialogHeader>              <DialogTitle>{currentEvent?.id ? 'Editar Evento' : 'Agregar Nuevo Evento'}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit}>
               <div className="grid gap-4 py-4">
                 <div className="grid items-center gap-1.5">
-                  <Label htmlFor="title">Event Title</Label>
+                  <Label htmlFor="title">Título del Evento</Label>
                   <Input id="title" value={formTitle} onChange={(e) => setFormTitle(e.target.value)} required />
                 </div>
-                <div className="grid items-center gap-1.5">
-                  <Label htmlFor="description">Description (Optional)</Label>
+                <div className="grid items-center gap-1.5">                  <Label htmlFor="description">Descripción (Opcional)</Label>
                   <Textarea id="description" value={formDescription} onChange={(e) => setFormDescription(e.target.value)} />
                 </div>
                 <div className="grid items-center gap-1.5">
-                  <Label htmlFor="event_date">Event Date and Time</Label>
+                  <Label htmlFor="event_date">Fecha y Hora del Evento</Label>
                   <Input id="event_date" type="datetime-local" value={formEventDate} onChange={(e) => setFormEventDate(e.target.value)} required />
                 </div>
 
                 <div className="grid items-center gap-1.5">
-                  <Label>Target Audience (select classes if not for all parents)</Label>
+                  <Label>Audiencia Objetivo (seleccionar clases si no es para todos los padres)</Label>
                   <Card className="max-h-48 overflow-y-auto p-2 border"> {/* Scrollable class list */}
                     {allClasses.length === 0 && <p className="text-sm text-muted-foreground">No classes found or loading...</p>}
                     {allClasses.map(cls => (
@@ -308,9 +303,8 @@ export default function EventManager() {
                 </div>
               </div>
                {error && <p className="text-red-500 mb-2 text-sm px-1">{error}</p>}
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={loading}>{loading ? 'Saving...' : 'Save Event'}</Button>
+              <DialogFooter>                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
+                <Button type="submit" disabled={loading}>{loading ? 'Guardando...' : 'Guardar Evento'}</Button>
               </DialogFooter>
             </form>
           </DialogContent>

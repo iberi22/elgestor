@@ -66,21 +66,20 @@ export default function FinancialSummary() {
 
   return (
     <Card className="md:col-span-2"> {/* Adjusted span */}
-      <CardHeader>
-        <CardTitle>Financial Summary</CardTitle>
-        <CardDescription>Overview of total collections and expenses.</CardDescription>
+      <CardHeader>        <CardTitle>Resumen Financiero</CardTitle>
+        <CardDescription>Vista general de cobros y gastos totales.</CardDescription>
       </CardHeader>
       <CardContent>
-        {loading && <p>Loading summary...</p>}
+        {loading && <p>Cargando resumen...</p>}
         {error && <p className="text-red-500">{error}</p>}
         {summary && !loading && !error && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-sm text-muted-foreground">Total Collected</p>
+              <p className="text-sm text-muted-foreground">Total Recaudado</p>
               <p className="text-2xl font-bold">{formatCurrency(summary.totalCollected)}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Total Expenses</p>
+              <p className="text-sm text-muted-foreground">Gastos Totales</p>
               <p className="text-2xl font-bold">{formatCurrency(summary.totalExpenses)}</p>
             </div>
             <div>

@@ -12,7 +12,7 @@ interface StudentWithFeeStatus {
   fee_id: number | null
   fee_year: number | null
   fee_amount: number | null
-  payment_status: 'Paid' | 'Pending' | 'Not Applicable' | 'No Fee Defined'
+  payment_status: 'Pagado' | 'Pendiente' | 'No Aplicable' | 'Cuota No Definida'
   payment_id: number | null
 }
 
@@ -81,7 +81,7 @@ export default function FeeStatus() {
           fee_id: null,
           fee_year: null,
           fee_amount: null,
-          payment_status: 'No Fee Defined' as const,
+          payment_status: 'Cuota No Definida' as const,
           payment_id: null,
         }))
         setFeeStatuses(statuses)
@@ -103,13 +103,11 @@ export default function FeeStatus() {
         if (paymentError && paymentError.code !== 'PGRST116') { // PGRST116 is ok, means no payment record
           console.error(`Error fetching payment for student ${student.id}, fee ${currentFee.id}: ${paymentError.message}`)
           // Decide how to handle this: treat as pending or show error? For now, treat as pending if fee exists.
-        }
-
-        let status: StudentWithFeeStatus['payment_status'] = 'Pending';
+        }        let status: StudentWithFeeStatus['payment_status'] = 'Pendiente';
         if (payment && payment.status === 'paid') {
-            status = 'Paid';
+            status = 'Pagado';
         } else if (!currentFee) {
-            status = 'No Fee Defined';
+            status = 'Cuota No Definida';
         }
         // If payment record exists but not 'paid', it's still 'Pending' (or 'Failed' if we had that status)
 
@@ -135,13 +133,12 @@ export default function FeeStatus() {
       setLoading(false)
     }
   }
-
   const getStatusBadgeVariant = (status: StudentWithFeeStatus['payment_status']) => {
     switch (status) {
-      case 'Paid': return 'success';
-      case 'Pending': return 'warning'; // Assuming 'warning' is a variant or maps to yellow/orange
-      case 'No Fee Defined': return 'secondary';
-      case 'Not Applicable': return 'outline';
+      case 'Pagado': return 'success';
+      case 'Pendiente': return 'warning'; // Assuming 'warning' is a variant or maps to yellow/orange
+      case 'Cuota No Definida': return 'secondary';
+      case 'No Aplicable': return 'outline';
       default: return 'default';
     }
   }
@@ -152,20 +149,18 @@ export default function FeeStatus() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Annual Fee Status</CardTitle>
-        <CardDescription>Status of the current annual school fee for your children.</CardDescription>
+      <CardHeader>        <CardTitle>Estado de Cuota Anual</CardTitle>
+        <CardDescription>Estado de la cuota escolar anual de tus hijos.</CardDescription>
       </CardHeader>
       <CardContent>
-        {feeStatuses.length === 0 && <p>No children found for your profile, or no fees applicable at this time. Please add your children in your <a href="/profile" className="underline">profile</a>.</p>}
+        {feeStatuses.length === 0 && <p>No se encontraron hijos en tu perfil o no hay cuotas aplicables en este momento. Por favor agrega tus hijos en tu <a href="/profile" className="underline">perfil</a>.</p>}
         <div className="space-y-4">
           {feeStatuses.map(status => (
             <div key={status.student_id} className="p-3 border rounded-md flex justify-between items-center">
               <div>
                 <p className="font-semibold">{status.student_name} <span className="text-sm text-gray-500">({status.class_name})</span></p>
-                {status.fee_year && status.fee_amount && (
-                  <p className="text-sm">
-                    Fee for {status.fee_year}: ${status.fee_amount.toFixed(2)}
+                {status.fee_year && status.fee_amount && (                  <p className="text-sm">
+                    Cuota del {status.fee_year}: ${status.fee_amount.toFixed(2)}
                   </p>
                 )}
               </div>

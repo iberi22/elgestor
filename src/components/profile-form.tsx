@@ -2,7 +2,20 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/compo          <CardTitle>Tu Información</CardTitle>
+          <CardDescription>Actualiza tu información personal.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid w-full items-center gap-1.5 mb-4">
+            <Label htmlFor="email">Correo electrónico</Label>
+            <Input type="email" id="email" value={user.email || ''} disabled />
+          </div>
+          <div className="grid w-full items-center gap-1.5 mb-4">
+            <Label htmlFor="profileFullName">Nombre Completo</Label>
+            <Input
+              type="text"
+              id="profileFullName"
+              placeholder="Tu Nombre Completo"n'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select' // Assuming Select is installed via Shadcn
@@ -156,41 +169,38 @@ export default function ProfileForm() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
             />
-          </div>
-          <Button onClick={handleUpdateProfile} disabled={loading}>
-            {loading ? 'Updating...' : 'Update Profile'}
+          </div>          <Button onClick={handleUpdateProfile} disabled={loading}>
+            {loading ? 'Actualizando...' : 'Actualizar Perfil'}
           </Button>
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Manage Your Children</CardTitle>
-          <CardDescription>Add your children and assign them to their classes.</CardDescription>
+        <CardHeader>          <CardTitle>Administrar tus Hijos</CardTitle>
+          <CardDescription>Agrega tus hijos y asígnalos a sus clases.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleAddStudent} className="mb-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
               <div>
-                <Label htmlFor="studentName">Child&apos;s Full Name</Label>
+                <Label htmlFor="studentName">Nombre Completo del Hijo</Label>
                 <Input
                   id="studentName"
                   type="text"
-                  placeholder="Child&apos;s Name"
+                  placeholder="Nombre del Hijo"
                   value={newStudentName}
                   onChange={(e) => setNewStudentName(e.target.value)}
                   required
                 />
               </div>
-              <div>
-                <Label htmlFor="classSelect">Class</Label>
+              <div>                <Label htmlFor="classSelect">Clase</Label>
                 <Select
                   value={selectedClassId || ''}
                   onValueChange={(value) => setSelectedClassId(value)}
                   required
                 >
                   <SelectTrigger id="classSelect">
-                    <SelectValue placeholder="Select a class" />
+                    <SelectValue placeholder="Seleccionar una clase" />
                   </SelectTrigger>
                   <SelectContent>
                     {availableClasses.map((cls) => (
@@ -202,7 +212,7 @@ export default function ProfileForm() {
                 </Select>
               </div>
               <Button type="submit" className="w-full md:w-auto" disabled={loading}>
-                {loading ? 'Adding...' : 'Add Child'}
+                {loading ? 'Agregando...' : 'Agregar Hijo'}
               </Button>
             </div>
           </form>
@@ -210,10 +220,9 @@ export default function ProfileForm() {
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
           {message && <p className="text-green-500 text-sm mb-4">{message}</p>}
 
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Your Registered Children:</h3>
-            {students.length === 0 && !loading && <p>No children added yet.</p>}
-            {loading && students.length === 0 && <p>Loading children...</p>}
+          <div>            <h3 className="text-lg font-semibold mb-2">Tus Hijos Registrados:</h3>
+            {students.length === 0 && !loading && <p>No hay hijos agregados aún.</p>}
+            {loading && students.length === 0 && <p>Cargando hijos...</p>}
             <ul className="space-y-2">
               {students.map((student) => (
                 <li key={student.id || student.full_name} className="p-2 border rounded">
