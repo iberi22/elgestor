@@ -11,4 +11,11 @@ if (!supabaseAnonKey) {
   throw new Error("NEXT_PUBLIC_SUPABASE_ANON_KEY is not defined in .env.local")
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+  },
+})

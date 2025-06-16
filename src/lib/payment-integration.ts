@@ -1,134 +1,269 @@
-// --- Payment Integration Placeholder ---
-// This file outlines the steps and considerations for integrating a payment SDK like Stripe or MercadoPago.
-// Actual SDK installation and full implementation require manual setup and testing.
-
-// Potential SDKs:
-// Stripe: @stripe/stripe-js (client-side), stripe (server-side for Node.js)
-// MercadoPago: mercadopago (Node.js SDK), client-side JS library
-
-// -----------------------------------------------------------------------------
-// 1. SDK Installation (Manual Step Recommended)
-// -----------------------------------------------------------------------------
-// Due to limitations in the automated environment, run these manually:
-// For Stripe:
-// npm install @stripe/stripe-js
-// npm install stripe
-// For MercadoPago:
-// npm install mercadopago
-//
-// Also, ensure environment variables for API keys are set (e.g., .env.local):
-// NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_YOUR_STRIPE_PUBLISHABLE_KEY
-// STRIPE_SECRET_KEY=sk_test_YOUR_STRIPE_SECRET_KEY
-// Or for MercadoPago:
-// MERCADOPAGO_ACCESS_TOKEN=YOUR_ACCESS_TOKEN
-// -----------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------
-// 2. Client-Side Initialization (Example for Stripe)
-// -----------------------------------------------------------------------------
-// This would typically happen in a high-level component or a dedicated context/provider.
-// import { loadStripe, Stripe } from '@stripe/stripe-js';
-// let stripePromise: Promise<Stripe | null> | null = null;
-// const getStripe = () => {
-//   if (!stripePromise) {
-//     const publicKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-//     if (!publicKey) {
-//       console.error("Stripe publishable key is not set.");
-//       return null;
-//     }
-//     stripePromise = loadStripe(publicKey);
-//   }
-//   return stripePromise;
-// };
-// export { getStripe }; // Export for use in payment initiation components
-// -----------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------
-// 3. Payment Initiation (Example: Called by a "Pay Fee" button)
-// -----------------------------------------------------------------------------
-// This function would be called from the UI, e.g., when a parent clicks "Pay Fee".
-// It needs details like fee amount, currency, student ID, fee ID, parent ID/email.
+// payment-integration.ts
+// Sistema de pagos integrado para Chile con múltiples pasarelas
 
 interface PaymentDetails {
   feeId: number;
   studentId: number;
-  amount: number; // Amount in cents for Stripe
-  currency: string; // e.g., 'usd'
+  amount: number;
+  currency: string;
   description: string;
-  parentId?: string; // For associating payment with parent user
-  parentEmail?: string; // For Stripe customer
+  parentId?: string;
+  parentEmail?: string;
+  paymentMethod?: 'webpay' | 'mercadopago' | 'stripe' | 'khipu' | 'flow';
 }
 
-export async function initiatePayment(details: PaymentDetails) {
-  console.log("Attempting to initiate payment (Placeholder)...", details);
+interface PaymentResult {
+  success: boolean;
+  message?: string;
+  redirectUrl?: string;
+  error?: string;
+  paymentMethod?: string;
+}
 
-  // **Step 3.1: Create a Payment Intent on your server**
-  // Your client-side code would call an API route (e.g., /api/create-payment-intent)
-  // This API route uses the server-side SDK (e.g., Stripe Node.js library)
-  // to create a PaymentIntent or a checkout session.
+// Configuración de pasarelas de pago populares en Chile
+const PAYMENT_PROVIDERS = {
+  webpay: {
+    name: 'Webpay Plus (Transbank)',
+    description: 'Tarjetas de crédito y débito chilenas',
+    currencies: ['CLP'],
+    fees: '2.95%',
+    popular: true,
+    logo: '/images/webpay-logo.png'
+  },
+  mercadopago: {
+    name: 'Mercado Pago',
+    description: 'Tarjetas, transferencias y efectivo',
+    currencies: ['CLP', 'USD'],
+    fees: '3.49%',
+    popular: true,
+    logo: '/images/mercadopago-logo.png'
+  },
+  khipu: {
+    name: 'Khipu',
+    description: 'Transferencias bancarias instantáneas',
+    currencies: ['CLP'],
+    fees: '1.95%',
+    popular: true,
+    logo: '/images/khipu-logo.png'
+  },
+  flow: {
+    name: 'Flow',
+    description: 'Múltiples medios de pago chilenos',
+    currencies: ['CLP'],
+    fees: '2.9%',
+    popular: true,
+    logo: '/images/flow-logo.png'
+  },
+  stripe: {
+    name: 'Stripe',
+    description: 'Tarjetas internacionales',
+    currencies: ['CLP', 'USD'],
+    fees: '3.6%',
+    popular: false,
+    logo: '/images/stripe-logo.png'
+  }
+};
 
-  // const response = await fetch('/api/create-payment-intent', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({
-  //     amount: details.amount,
-  //     currency: details.currency,
-  //     metadata: { feeId: details.feeId, studentId: details.studentId, parentId: details.parentId }
-  //   }),
+export async function initiatePayment(details: PaymentDetails): Promise<PaymentResult> {
+  console.log("Iniciando pago con detalles:", details);
+
+  const paymentMethod = details.paymentMethod || 'webpay'; // Default a Webpay para Chile
+
+  switch (paymentMethod) {
+    case 'webpay':
+      return await initiateWebpayPayment(details);
+    case 'mercadopago':
+      return await initiateMercadoPagoPayment(details);
+    case 'khipu':
+      return await initiateKhipuPayment(details);
+    case 'flow':
+      return await initiateFlowPayment(details);
+    case 'stripe':
+      return await initiateStripePayment(details);
+    default:
+      return {
+        success: false,
+        error: `Método de pago no soportado: ${paymentMethod}`
+      };
+  }
+}
+
+// Webpay Plus (Transbank) - Más popular en Chile
+async function initiateWebpayPayment(details: PaymentDetails): Promise<PaymentResult> {
+  // --- Integración con Webpay Plus ---
+  // const WebpayPlus = require('transbank-sdk').WebpayPlus;
+  // const response = await WebpayPlus.Transaction.create(
+  //   `order_${details.feeId}_${details.studentId}_${Date.now()}`,
+  //   details.amount,
+  //   `${process.env.NEXTAUTH_URL}/payment/webpay/return`,
+  //   `${process.env.NEXTAUTH_URL}/payment/webpay/final`
+  // );
+  // return { success: true, redirectUrl: response.url, paymentMethod: 'webpay' };
+
+  // Simulación para desarrollo
+  const simulatedUrl = `/payment/simulate?provider=webpay&feeId=${details.feeId}&studentId=${details.studentId}&amount=${details.amount}`;
+  return {
+    success: true,
+    message: "Redirigiendo a Webpay Plus (Transbank)...",
+    redirectUrl: simulatedUrl,
+    paymentMethod: 'webpay'
+  };
+}
+
+// Mercado Pago
+async function initiateMercadoPagoPayment(details: PaymentDetails): Promise<PaymentResult> {
+  // --- Integración con Mercado Pago ---
+  // const mercadopago = require('mercadopago');
+  // mercadopago.configure({ access_token: process.env.MERCADOPAGO_ACCESS_TOKEN });
+  // const preference = {
+  //   items: [{
+  //     title: details.description,
+  //     unit_price: details.amount,
+  //     quantity: 1,
+  //     currency_id: 'CLP'
+  //   }],
+  //   back_urls: {
+  //     success: `${process.env.NEXTAUTH_URL}/payment/mercadopago/success`,
+  //     failure: `${process.env.NEXTAUTH_URL}/payment/mercadopago/failure`,
+  //     pending: `${process.env.NEXTAUTH_URL}/payment/mercadopago/pending`,
+  //   },
+  //   auto_return: 'approved',
+  //   external_reference: `fee_${details.feeId}_student_${details.studentId}`,
+  // };
+  // const response = await mercadopago.preferences.create(preference);
+  // return { success: true, redirectUrl: response.body.init_point, paymentMethod: 'mercadopago' };
+
+  // Simulación para desarrollo
+  const simulatedUrl = `/payment/simulate?provider=mercadopago&feeId=${details.feeId}&studentId=${details.studentId}&amount=${details.amount}`;
+  return {
+    success: true,
+    message: "Redirigiendo a Mercado Pago...",
+    redirectUrl: simulatedUrl,
+    paymentMethod: 'mercadopago'
+  };
+}
+
+// Khipu - Transferencias bancarias
+async function initiateKhipuPayment(details: PaymentDetails): Promise<PaymentResult> {
+  // --- Integración con Khipu ---
+  // const khipu = require('khipu');
+  // const client = new khipu.PaymentsApi();
+  // const payment = await client.paymentsPost({
+  //   amount: details.amount,
+  //   currency: 'CLP',
+  //   subject: details.description,
+  //   transaction_id: `fee_${details.feeId}_student_${details.studentId}`,
+  //   return_url: `${process.env.NEXTAUTH_URL}/payment/khipu/return`,
+  //   notify_url: `${process.env.NEXTAUTH_URL}/api/webhooks/khipu`
   // });
-  // const paymentIntentData = await response.json();
-  // const clientSecret = paymentIntentData.clientSecret; // From Stripe PaymentIntent
-  // const sessionId = paymentIntentData.id; // From Stripe Checkout Session
+  // return { success: true, redirectUrl: payment.payment_url, paymentMethod: 'khipu' };
 
-  // if (!clientSecret && !sessionId) {
-  //   console.error("Failed to create payment intent or session.");
-  //   alert("Payment setup failed. Please try again.");
-  //   return;
-  // }
-
-  // **Step 3.2: Redirect to Checkout or Confirm Payment (Client-Side)**
-  // For Stripe Checkout:
-  // const stripe = await getStripe();
-  // if (!stripe) {
-  //    alert("Stripe.js failed to load. Please check your internet connection or refresh the page.");
-  //    return;
-  // }
-  // const { error } = await stripe.redirectToCheckout({ sessionId });
-  // if (error) {
-  //   console.error("Stripe redirect to checkout error:", error);
-  //   alert(`Payment error: ${error.message}`);
-  // }
-
-  // For MercadoPago, the flow would be similar: create a preference on the server,
-  // then redirect to checkout or use their client-side SDK.
-
-  alert(`(Placeholder) Payment process for ${details.description} would start now. Amount: ${(details.amount / 100).toFixed(2)} ${details.currency.toUpperCase()}.`);
-  // This alert simulates the start of the payment process.
-  // In a real scenario, this is where you'd use the SDK to interact with the payment provider.
-  return { success: true, message: "Payment initiation placeholder successful." };
+  // Simulación para desarrollo
+  const simulatedUrl = `/payment/simulate?provider=khipu&feeId=${details.feeId}&studentId=${details.studentId}&amount=${details.amount}`;
+  return {
+    success: true,
+    message: "Redirigiendo a Khipu (Transferencia bancaria)...",
+    redirectUrl: simulatedUrl,
+    paymentMethod: 'khipu'
+  };
 }
-// -----------------------------------------------------------------------------
 
-// -----------------------------------------------------------------------------
-// 4. Server-Side: API Route for Creating Payment Intent/Session
-// -----------------------------------------------------------------------------
-// (Example: /pages/api/create-payment-intent.ts or /app/api/create-payment-intent/route.ts)
-// This API route would handle:
-// - Receiving payment details from the client.
-// - Using the server-side SDK (Stripe Node, MercadoPago SDK) to create a payment session.
-// - Returning the client secret or session ID to the client.
-// - Securely handling API keys.
-// - Potentially creating/updating a 'pending' payment record in your database here.
-// -----------------------------------------------------------------------------
+// Flow
+async function initiateFlowPayment(details: PaymentDetails): Promise<PaymentResult> {
+  // --- Integración con Flow ---
+  // const flow = require('flow-sdk');
+  // const payment = await flow.createPayment({
+  //   amount: details.amount,
+  //   currency: 'CLP',
+  //   subject: details.description,
+  //   commerceOrder: `fee_${details.feeId}_student_${details.studentId}`,
+  //   urlConfirmation: `${process.env.NEXTAUTH_URL}/api/webhooks/flow`,
+  //   urlReturn: `${process.env.NEXTAUTH_URL}/payment/flow/return`
+  // });
+  // return { success: true, redirectUrl: payment.url, paymentMethod: 'flow' };
 
-// -----------------------------------------------------------------------------
-// 5. Server-Side: Webhook Handler for Payment Confirmation
-// -----------------------------------------------------------------------------
-// (Example: /pages/api/webhooks/stripe.ts or /app/api/webhooks/stripe/route.ts)
-// This is covered in a separate step of Milestone 3. It handles:
-// - Receiving webhook events from the payment provider (e.g., 'checkout.session.completed').
-// - Verifying webhook signature.
-// - Updating your database (e.g., marking payment as 'paid').
-// -----------------------------------------------------------------------------
+  // Simulación para desarrollo
+  const simulatedUrl = `/payment/simulate?provider=flow&feeId=${details.feeId}&studentId=${details.studentId}&amount=${details.amount}`;
+  return {
+    success: true,
+    message: "Redirigiendo a Flow...",
+    redirectUrl: simulatedUrl,
+    paymentMethod: 'flow'
+  };
+}
 
-console.log("Payment integration placeholder module loaded. See comments for implementation details.");
+// Stripe (para tarjetas internacionales)
+async function initiateStripePayment(details: PaymentDetails): Promise<PaymentResult> {
+  // --- Integración con Stripe ---
+  // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+  // const session = await stripe.checkout.sessions.create({
+  //   payment_method_types: ['card'],
+  //   line_items: [{
+  //     price_data: {
+  //       currency: details.currency.toLowerCase(),
+  //       product_data: { name: details.description },
+  //       unit_amount: details.amount * 100, // Stripe expects amount in cents
+  //     },
+  //     quantity: 1,
+  //   }],
+  //   mode: 'payment',
+  //   success_url: `${process.env.NEXTAUTH_URL}/payment/stripe/success?session_id={CHECKOUT_SESSION_ID}`,
+  //   cancel_url: `${process.env.NEXTAUTH_URL}/payment/stripe/cancel`,
+  //   metadata: {
+  //     feeId: details.feeId.toString(),
+  //     studentId: details.studentId.toString(),
+  //     parentId: details.parentId || '',
+  //   },
+  // });
+  // return { success: true, redirectUrl: session.url, paymentMethod: 'stripe' };
+
+  // Simulación para desarrollo
+  const simulatedUrl = `/payment/simulate?provider=stripe&feeId=${details.feeId}&studentId=${details.studentId}&amount=${details.amount}`;
+  return {
+    success: true,
+    message: "Redirigiendo a Stripe...",
+    redirectUrl: simulatedUrl,
+    paymentMethod: 'stripe'
+  };
+}
+
+// Función para obtener métodos de pago disponibles
+export function getAvailablePaymentMethods() {
+  return PAYMENT_PROVIDERS;
+}
+
+// Función para obtener el método de pago recomendado para Chile
+export function getRecommendedPaymentMethod(): string {
+  return 'webpay'; // Webpay Plus es el más usado en Chile
+}
+
+// Función para formatear montos en pesos chilenos
+export function formatCLP(amount: number): string {
+  return new Intl.NumberFormat('es-CL', {
+    style: 'currency',
+    currency: 'CLP',
+    minimumFractionDigits: 0,
+  }).format(amount);
+}
+
+// Función para validar montos mínimos por pasarela
+export function validatePaymentAmount(amount: number, method: string): { valid: boolean; message?: string } {
+  const minimums = {
+    webpay: 50,      // $50 CLP mínimo
+    mercadopago: 100, // $100 CLP mínimo
+    khipu: 100,      // $100 CLP mínimo
+    flow: 50,        // $50 CLP mínimo
+    stripe: 500      // $500 CLP mínimo (por comisiones internacionales)
+  };
+
+  const minimum = minimums[method as keyof typeof minimums] || 50;
+
+  if (amount < minimum) {
+    return {
+      valid: false,
+      message: `El monto mínimo para ${PAYMENT_PROVIDERS[method as keyof typeof PAYMENT_PROVIDERS]?.name} es ${formatCLP(minimum)}`
+    };
+  }
+
+  return { valid: true };
+}

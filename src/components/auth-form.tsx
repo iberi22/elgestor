@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { Button } from '@/components/ui/button'
@@ -23,6 +23,37 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
   const title = mode === 'signin' ? 'Sign In' : 'Sign Up'
   const description = mode === 'signin' ? 'Enter your credentials to access your account.' : 'Create a new account.'
+
+  useEffect(() => {
+    // Check if user is already logged in
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        console.log('User already logged in, redirecting to /dashboard')
+        router.push('/dashboard')
+      }
+    }
+
+    checkUser()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state change event:', event, 'Session:', session);
+
+      if (event === 'SIGNED_IN' && session) {
+        console.log('User signed in, redirecting to /dashboard');
+        router.push('/dashboard')
+      }
+
+      if (event === 'SIGNED_OUT') {
+        console.log('User signed out')
+        router.push('/signin')
+      }
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [router])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -53,8 +84,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
           // Potentially delete the auth user if profile creation fails or handle it otherwise
         } else {
           setMessage('Sign up successful! Please check your email to verify your account.')
-          // Redirect or clear form, for now, just a message
-          // router.push('/')
         }
       } else {
          setMessage('Sign up successful! Please check your email to verify your account.')
@@ -68,8 +97,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
         setError(signInError.message)
       } else {
         setMessage('Sign in successful! Redirecting...')
-        router.push('/dashboard') // Redirect to a dashboard page after sign in
-        console.log('Sign in successful! Redirecting...')
+        // Forzar redirección inmediata
+        router.push('/dashboard')
       }
     }
     setLoading(false)

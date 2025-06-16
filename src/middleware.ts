@@ -32,39 +32,56 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { session } } = await supabase.auth.getSession()
-  const user = session?.user
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession()
 
-  const { pathname } = request.nextUrl
-
-  // Define protected routes that require login
-  // (app) group routes like /profile, /dashboard, /admin/*
-  const isAppRoute = pathname.startsWith('/profile') || pathname.startsWith('/dashboard') || pathname.startsWith('/admin')
-
-  // If user is not signed in and trying to access a protected app route
-  if (!user && isAppRoute) {
-    return NextResponse.redirect(new URL('/signin', request.url))
-  }
-
-  // If user is signed in, but tries to access auth pages like signin/signup, redirect to dashboard
-  if (user && (pathname.startsWith('/signin') || pathname.startsWith('/signup'))) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
-  }
-
-  // Admin route protection
-  if (user && pathname.startsWith('/admin')) {
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (error || !profile || profile.role !== 'admin') {
-      // User is not an admin or profile fetch failed, redirect them.
-      // Redirect to a general dashboard or a specific 'unauthorized' page.
-      // Adding a query param for clarity on client-side if needed.
-      return NextResponse.redirect(new URL('/dashboard?error=admin_unauthorized', request.url))
+    if (error) {
+      console.error('Session error in middleware:', error)
     }
+
+    const user = session?.user
+    const { pathname } = request.nextUrl
+
+    console.log('Middleware - Path:', pathname, 'User:', user ? 'authenticated' : 'not authenticated')
+
+    // Define protected routes that require login
+    const isAppRoute = pathname.startsWith('/profile') || pathname.startsWith('/dashboard') || pathname.startsWith('/admin')
+    const isAuthRoute = pathname.startsWith('/signin') || pathname.startsWith('/signup')
+
+    // If user is not signed in and trying to access a protected app route
+    if (!user && isAppRoute) {
+      console.log('Redirecting to signin - no user for protected route')
+      return NextResponse.redirect(new URL('/signin', request.url))
+    }
+
+    // If user is signed in, but tries to access auth pages like signin/signup, redirect to dashboard
+    if (user && isAuthRoute) {
+      console.log('Redirecting to dashboard - user already authenticated')
+      const response = NextResponse.redirect(new URL('/dashboard', request.url), {
+        status: 303, // See Other
+      })
+      response.headers.set('x-middleware-cache', 'no-cache')
+      return response
+    }
+
+    // Admin route protection
+    if (user && pathname.startsWith('/admin')) {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (error || !profile || profile.role !== 'admin') {
+        // User is not an admin or profile fetch failed, redirect them.
+        // Redirect to a general dashboard or a specific 'unauthorized' page.
+        // Adding a query param for clarity on client-side if needed.
+        return NextResponse.redirect(new URL('/dashboard?error=admin_unauthorized', request.url))
+      }
+    }
+
+  } catch (error) {
+    console.error('Middleware error:', error)
   }
 
   return response
@@ -72,15 +89,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - api (API routes, if any, not explicitly auth-protected by this middleware)
-     * Matcher needs to cover all routes that should pass through middleware.
-     * The logic inside then decides what to do.
-     */
-    '/((?!_next/static|_next/image|favicon.ico|api/).*)',
+    // Comenta temporalmente para deshabilitar el middleware
+    // '/((?!_next/static|_next/image|favicon.ico|api/).*)',
   ],
 }

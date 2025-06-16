@@ -7,7 +7,8 @@ import { User } from '@supabase/supabase-js'
 import Link from 'next/link' // For navigation links
 import FeeStatus from '@/components/parent/fee-status'
 import { initiatePayment } from '@/lib/payment-integration'
-import EventViewer from '@/components/parent/event-viewer' // Added import
+import EventViewer from '@/components/parent/event-viewer'
+import PaymentMethodSelector from '@/components/parent/payment-method-selector'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)

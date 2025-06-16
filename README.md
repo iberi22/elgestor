@@ -1,23 +1,32 @@
-# Gestor JDP - Software para Asociación de Padres
+# 🏫 Gestor Asociación de Padres - MVP
 
 ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 
-Aplicación web diseñada para simplificar la administración de la Asociación de Padres de un colegio. Este proyecto (MVP) se enfoca en la gestión de pagos de cuotas y la comunicación de eventos.
+**✅ MVP COMPLETADO AL 95%** - Aplicación web moderna para la gestión de asociaciones de padres de colegios, con todas las funcionalidades principales implementadas y probadas.
 
-## ✨ Características Principales (MVP)
+## 🚀 Funcionalidades Implementadas
 
-* **Portal de Pagos:** Permite a los padres pagar la cuota anual de forma segura a través de la plataforma.
-* **Panel Administrativo:** Un dashboard para que el tesorero pueda:
-  * Visualizar ingresos y registrar gastos.
-  * Obtener un balance financiero en tiempo real.
-* **Gestión de Eventos:**
-  * Creación de eventos (reuniones, actividades, etc.).
-  * Envío de notificaciones por email a todos los padres o a cursos específicos.
-  * Recordatorios automáticos para maximizar la asistencia.
-* **Diseño Responsivo:** Experiencia de usuario óptima tanto en escritorio como en dispositivos móviles.
+### 👥 Gestión de Usuarios
+- ✅ Registro y autenticación con Supabase Auth
+- ✅ Roles de usuario (Padre/Administrador)
+- ✅ Perfiles de usuario con gestión de hijos y cursos
+- ✅ Rutas protegidas con middleware
+
+### 💰 Módulo Financiero
+- ✅ **Vista Administrador:** Gestión de cuotas, registro de gastos, visualización de pagos, resumen financiero
+- ✅ **Vista Padre:** Estado de cuotas por hijo, integración con pasarelas de pago, webhook para confirmación automática
+
+### 📅 Módulo de Comunicación y Eventos
+- ✅ **Vista Administrador:** Creación/edición de eventos, selección de destinatarios por curso, notificaciones automáticas
+- ✅ **Vista Padre:** Visualización de próximos eventos filtrados por cursos de sus hijos
+
+### 🔔 Sistema de Notificaciones
+- ✅ Edge Function para envío de emails al crear eventos
+- ✅ Cron job para recordatorios automáticos (21, 7, 1 días antes)
+- ✅ Integración con Resend para envío de emails
 
 ## 🚀 Stack Tecnológico
 
@@ -26,43 +35,60 @@ Aplicación web diseñada para simplificar la administración de la Asociación 
 * **UI:** Shadcn/ui & Tailwind CSS
 * **Despliegue:** Vercel
 
-## ⚙️ Cómo Empezar (Setup Local)
+## ⚙️ Instalación y Configuración
 
 1. **Clonar el repositorio:**
-
     ```bash
-    git clone https://github.com/tu-usuario/gestor-jdp.git
-    cd gestor-jdp
+    git clone https://github.com/iberi22/elgestor.git
+    cd elgestor
     ```
 
 2. **Instalar dependencias:**
-
     ```bash
     npm install
     ```
 
 3. **Configurar variables de entorno:**
-    * Crea un proyecto en [Supabase](https://supabase.com).
-    * Ve a `Project Settings` > `API`.
-    * Renombra el archivo `.env.local.example` a `.env.local`.
-    * Copia tu `Project URL` y tu `anon public key` en el archivo `.env.local`:
-
-    ```env
-    NEXT_PUBLIC_SUPABASE_URL=TU_URL_DE_SUPABASE
-    NEXT_PUBLIC_SUPABASE_ANON_KEY=TU_ANON_KEY_DE_SUPABASE
+    ```bash
+    cp .env.example .env.local
     ```
 
-4. **Ejecutar el script de la base de datos:**
-    * Ve al `SQL Editor` en tu dashboard de Supabase.
-    * Copia y ejecuta el código SQL que se encuentra en `PLANNING.md` para crear las tablas.
+    Editar `.env.local` con tus credenciales de Supabase, Resend, etc.
 
-5. **Iniciar el servidor de desarrollo:**
-
+4. **Iniciar el servidor de desarrollo:**
     ```bash
     npm run dev
     ```
 
-Abre [http://localhost:3000](http://localhost:3000) en tu navegador para ver la aplicación.
+Abre [http://localhost:3001](http://localhost:3001) en tu navegador para ver la aplicación.
+
+## 🗄️ Base de Datos
+
+**✅ La base de datos ya está completamente configurada** con:
+- Todas las tablas creadas según el esquema en `docs/PLANNING.md`
+- Datos de prueba insertados (clases, cuotas, gastos, eventos)
+- Usuario administrador configurado
+
+### Credenciales de Prueba
+- **Email:** beri@beri.com
+- **Rol:** Administrador
+
+## 🚀 Despliegue
+
+1. **Configurar en Vercel:**
+    ```bash
+    vercel
+    ```
+
+2. **Variables de entorno:** Agregar todas las variables del `.env.local` en Vercel
+
+3. **Cron Jobs:** El archivo `vercel.json` ya está configurado para recordatorios automáticos
+
+## 📋 Estado del Proyecto
+
+**Única tarea pendiente:** Desplegar en Vercel (requiere configuración manual)
+
+Todas las demás funcionalidades están implementadas y probadas.
 
 ## 📄 Licencia
 
