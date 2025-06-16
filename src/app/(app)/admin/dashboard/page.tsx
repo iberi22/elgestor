@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
-import { User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation' // Corrected import
 import FeeManager from '@/components/admin/fee-manager'
 import ExpenseManager from '@/components/admin/expense-manager'
@@ -11,7 +10,6 @@ import FinancialSummary from '@/components/admin/financial-summary'
 import EventManager from '@/components/admin/event-manager' // Added import
 
 export default function AdminDashboardPage() {
-  const [user, setUser] = useState<User | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
@@ -27,7 +25,6 @@ export default function AdminDashboardPage() {
       }
 
       const currentUser = session.user
-      setUser(currentUser)
 
       if (currentUser) {
         const { data: profile, error: profileError } = await supabase

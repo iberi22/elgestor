@@ -9,20 +9,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { User } from '@supabase/supabase-js'
 
+// Mock data for classes - replace with actual data from Supabase
+// const MOCK_CLASSES = [
+//   { id: 1, name: 'Primero A' },
+//   { id: 2, name: 'Primero B' },
+//   { id: 3, name: 'Segundo A' },
+//   { id: 4, name: 'Segundo B' },
+//   { id: 5, name: 'Tercero A' },
+//   { id: 6, name: 'Tercero B' },
+// ]
+
 interface Student {
   id?: number
   full_name: string
   class_id: number
   class_name?: string // For display
 }
-
-// Mock classes data for now
-const MOCK_CLASSES = [
-  { id: 1, name: 'Primero A' },
-  { id: 2, name: 'Primero B' },
-  { id: 3, name: 'Segundo A' },
-  { id: 4, name: 'Segundo B' },
-]
 
 export default function ProfileForm() {
   const [user, setUser] = useState<User | null>(null)
@@ -31,7 +33,7 @@ export default function ProfileForm() {
   const [students, setStudents] = useState<Student[]>([])
   const [newStudentName, setNewStudentName] = useState('')
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null)
-  const [availableClasses, setAvailableClasses] = useState<{id: number, name: string}[]>(MOCK_CLASSES)
+  const [availableClasses] = useState<{ id: number; name: string }[]>([])
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
 
@@ -69,7 +71,7 @@ export default function ProfileForm() {
             id: s.id,
             full_name: s.full_name,
             class_id: s.class_id,
-            // @ts-ignore
+            // @ts-expect-error: s.classes puede ser undefined si no hay relación
             class_name: s.classes?.name || 'Unknown Class'
           }))
           setStudents(formattedStudents)
@@ -107,7 +109,7 @@ export default function ProfileForm() {
     if (insertError) {
       setError(`Error adding student: ${insertError.message}`)
     } else if (newStudent) {
-      // @ts-ignore
+      // @ts-expect-error: newStudent.classes puede ser undefined
       const studentToAdd: Student = { ...newStudent, class_name: newStudent.classes?.name || 'Unknown Class' }
       setStudents([...students, studentToAdd])
       setNewStudentName('')
@@ -170,11 +172,11 @@ export default function ProfileForm() {
           <form onSubmit={handleAddStudent} className="mb-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
               <div>
-                <Label htmlFor="studentName">Child's Full Name</Label>
+                <Label htmlFor="studentName">Child&apos;s Full Name</Label>
                 <Input
                   id="studentName"
                   type="text"
-                  placeholder="Child's Name"
+                  placeholder="Child&apos;s Name"
                   value={newStudentName}
                   onChange={(e) => setNewStudentName(e.target.value)}
                   required

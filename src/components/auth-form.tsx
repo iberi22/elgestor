@@ -69,6 +69,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
       } else {
         setMessage('Sign in successful! Redirecting...')
         router.push('/dashboard') // Redirect to a dashboard page after sign in
+        console.log('Sign in successful! Redirecting...')
       }
     }
     setLoading(false)
@@ -128,7 +129,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
         </CardContent>
         <CardFooter className="text-sm">
           {mode === 'signin' ? (
-            <p>Don't have an account? <a href="/signup" className="underline">Sign Up</a></p>
+            <p>Don&apos;t have an account? <a href="/signup" className="underline">Sign Up</a></p>
           ) : (
             <p>Already have an account? <a href="/signin" className="underline">Sign In</a></p>
           )}

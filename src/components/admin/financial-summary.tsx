@@ -51,9 +51,9 @@ export default function FinancialSummary() {
         balance: totalCollected - totalExpenses,
       })
 
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Error fetching financial summary:", e)
-      setError(`Error fetching summary: ${e.message}. Ensure RLS allows admins to read payments and expenses.`)
+      setError(`Error fetching summary: ${e instanceof Error ? e.message : 'Unknown error'}. Ensure RLS allows admins to read payments and expenses.`)
     } finally {
       setLoading(false)
     }

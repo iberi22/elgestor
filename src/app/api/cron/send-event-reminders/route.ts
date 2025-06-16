@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, SupabaseClient } from '@supabase/supabase-js' // Standard client for server-side routes
+import { createClient } from '@supabase/supabase-js' // Standard client for server-side routes
 
 // --- Resend Placeholder (same as in Edge Function) ---
 const RESEND_API_KEY = process.env.RESEND_API_KEY
@@ -24,7 +24,7 @@ async function sendEmail(to: string, subject: string, htmlBody: string) {
     return { success: true, data };
   } catch (error) {
     console.error('Failed to send cron reminder email:', error);
-    return { success: false, error: error.message };
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
 // --- End Resend Placeholder ---
@@ -96,12 +96,12 @@ export async function GET(req: NextRequest) {
       eventsFoundForReminders += events.length;
       console.log(`Found ${events.length} events for ${daysBefore}-day reminder.`);
 
-      for (const event of events as any[]) { // Type assertion for simplicity with joined data
+      for (const event of events as unknown[]) { // Type assertion for simplicity with joined data
         let parentEmails: string[] = [];
         const isTargeted = event.event_recipients && event.event_recipients.length > 0;
 
         if (isTargeted) {
-          const classIds = event.event_recipients.map((er: any) => er.class_id);
+          const classIds = event.event_recipients.map((er: unknown) => er.class_id);
           const { data: parentsInClasses, error: parentsError } = await supabaseAdminClient
             .from('students')
             .select('profiles!inner ( email )') // !inner ensures student must have a profile
@@ -111,7 +111,7 @@ export async function GET(req: NextRequest) {
             console.error(`Error fetching parents for event ${event.id} (targeted):`, parentsError);
             continue; // Skip this event's reminders
           }
-          parentEmails = parentsInClasses?.map((s: any) => s.profiles?.email).filter((email: string | null) => !!email) || [];
+          parentEmails = parentsInClasses?.map((s: unknown) => s.profiles?.email).filter((email: string | null) => !!email) || [];
         } else {
           const { data: allParents, error: allParentsError } = await supabaseAdminClient
             .from('profiles')
@@ -121,7 +121,7 @@ export async function GET(req: NextRequest) {
             console.error(`Error fetching all parents for event ${event.id}:`, allParentsError);
             continue; // Skip this event's reminders
           }
-          parentEmails = allParents?.map((p: any) => p.email).filter((email: string | null) => !!email) || [];
+          parentEmails = allParents?.map((p: unknown) => p.email).filter((email: string | null) => !!email) || [];
         }
 
         const uniqueEmails = [...new Set(parentEmails)];
@@ -144,8 +144,12 @@ export async function GET(req: NextRequest) {
         `;
 
         for (const email of uniqueEmails) {
-          const result = await sendEmail(email, emailSubject, emailHtmlBody);
-          if (result.success) emailsSuccessfullySent++; else emailSendingErrors++;
+          const result: unknown = await sendEmail(email, emailSubject, emailHtmlBody);
+          if (result instanceof Object && 'success' in result && (result as { success: boolean }).success) {
+            emailsSuccessfullySent++;
+          } else {
+            emailSendingErrors++;
+          }
         }
       }
     }
@@ -154,9 +158,9 @@ export async function GET(req: NextRequest) {
     console.log(summary);
     return NextResponse.json({ message: "Cron job executed.", summary });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in cron job send-event-reminders:', error);
-    return NextResponse.json({ error: `Cron job failed: ${error.message}` }, { status: 500 });
+    return NextResponse.json({ error: `Cron job failed: ${error instanceof Error ? error.message : 'Unknown error'}` }, { status: 500 });
   }
 }
 

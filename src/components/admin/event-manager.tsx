@@ -2,17 +2,14 @@
 
 import { useState, useEffect, FormEvent } from 'react'
 import { supabase } from '@/lib/supabaseClient'
-import { Button } from '@/components/ui/button' // Assuming available
-import { Input } from '@/components/ui/input'   // Assuming available
-import { Label } from '@/components/ui/label'   // Assuming available
-import { Textarea } from '@/components/ui/textarea' // Assuming available
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card' // Assuming available
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table" // Assuming available
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog" // Assuming available
-// For multi-selector for classes - this is more complex.
-// A basic version might use multiple checkboxes or a simpler select if Shadcn doesn't have an easy multi-select.
-// For now, we'll list classes and handle selection logic, but UI for multi-select might be basic.
-import { Checkbox } from "@/components/ui/checkbox" // Assuming available for class selection
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Checkbox } from "@/components/ui/checkbox"
 
 interface Event {
   id?: number
@@ -27,6 +24,19 @@ interface Event {
 interface SchoolClass {
   id: number
   name: string
+}
+
+interface EventRecipient {
+  class_id: number
+}
+
+interface EventWithRecipients {
+  id: number
+  title: string
+  description?: string | null
+  event_date: string
+  created_at?: string
+  event_recipients: EventRecipient[]
 }
 
 export default function EventManager() {
@@ -68,10 +78,10 @@ export default function EventManager() {
     if (fetchError) {
       setError(`Error fetching events: ${fetchError.message}`)
     } else if (data) {
-      const formattedEvents = data.map((event: any) => ({
+      const formattedEvents = data.map((event: EventWithRecipients) => ({
         ...event,
         event_date: event.event_date ? new Date(event.event_date).toISOString().substring(0, 16) : '', // Format for datetime-local
-        target_class_ids: event.event_recipients.map((er: any) => er.class_id)
+        target_class_ids: event.event_recipients.map((er: EventRecipient) => er.class_id)
       }))
       setEvents(formattedEvents)
     }
@@ -82,7 +92,7 @@ export default function EventManager() {
     const { data, error: classError } = await supabase.from('classes').select('id, name').order('name');
     if (classError) {
       console.error("Error fetching classes:", classError.message);
-      setError(prev => \`\${prev || ''} Error fetching classes: \${classError.message}\`);
+      setError(prev => `${prev || ''} Error fetching classes: ${classError.message}`);
     } else if (data) {
       setAllClasses(data);
     }
@@ -183,8 +193,8 @@ export default function EventManager() {
       }
 
       setMessage(`Event "${eventDataCore.title}" ${currentEvent && currentEvent.id ? 'updated' : 'created'} successfully.`)
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'An unknown error occurred')
     } finally {
       setIsDialogOpen(false)
       fetchEvents() // Refresh the list
@@ -207,8 +217,8 @@ export default function EventManager() {
 
       setMessage(`Event "${eventTitle}" deleted successfully.`);
       fetchEvents(); // Refresh list
-    } catch (e: any) {
-       setError(`Error deleting event: ${e.message}`);
+    } catch (e: unknown) {
+       setError(`Error deleting event: ${e instanceof Error ? e.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }

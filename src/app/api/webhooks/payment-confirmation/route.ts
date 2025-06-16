@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
         // const amountPaid = session.amount_total / 100; // Amount in currency units
 
         // --- Placeholder: Extract actual data from a simulated event ---
-        const { feeId, studentId, parentId, transactionId, amountPaid, paymentStatus } = event.data || {};
+        const { feeId, studentId, transactionId, amountPaid, paymentStatus } = event.data || {};
         // --- End Placeholder ---
 
         if (!feeId || !studentId || !transactionId) {
@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ received: true }, { status: 200 });
 
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Error processing webhook:", err);
     // Do not send detailed error messages back to the webhook sender unless it's a specific format they expect.
     return NextResponse.json({ error: 'Failed to process webhook.' }, { status: 500 });

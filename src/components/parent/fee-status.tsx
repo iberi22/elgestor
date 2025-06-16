@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
-import { User } from '@supabase/supabase-js'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card' // Assuming Card is available
 import { Badge } from '@/components/ui/badge' // Assuming Badge is available
 
@@ -18,7 +17,6 @@ interface StudentWithFeeStatus {
 }
 
 export default function FeeStatus() {
-  const [user, setUser] = useState<User | null>(null)
   const [feeStatuses, setFeeStatuses] = useState<StudentWithFeeStatus[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -31,7 +29,6 @@ export default function FeeStatus() {
         setError("User not authenticated.")
         return
       }
-      setUser(currentUser)
       fetchFeeStatuses(currentUser.id)
     }
     initialize()
@@ -77,14 +74,14 @@ export default function FeeStatus() {
       }
 
       if (!currentFee) { // No fee defined in the system at all
-        const statuses = studentsData.map((student: any) => ({
+        const statuses = studentsData.map((student: unknown) => ({
           student_id: student.id,
           student_name: student.full_name,
           class_name: student.classes?.name || 'N/A',
           fee_id: null,
           fee_year: null,
           fee_amount: null,
-          payment_status: 'No Fee Defined' as 'No Fee Defined',
+          payment_status: 'No Fee Defined' as const,
           payment_id: null,
         }))
         setFeeStatuses(statuses)
@@ -93,7 +90,7 @@ export default function FeeStatus() {
       }
 
       // 3. For each student, check their payment status for the currentFee
-      const studentFeePromises = studentsData.map(async (student: any) => {
+      const studentFeePromises = studentsData.map(async (student: unknown) => {
         const { data: payment, error: paymentError } = await supabase
           .from('payments')
           .select('id, status')
@@ -131,9 +128,9 @@ export default function FeeStatus() {
       const results = await Promise.all(studentFeePromises)
       setFeeStatuses(results)
 
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e)
-      setError(e.message)
+      setError(e instanceof Error ? e.message : 'Unknown error occurred')
     } finally {
       setLoading(false)
     }
@@ -172,7 +169,7 @@ export default function FeeStatus() {
                   </p>
                 )}
               </div>
-              <Badge variant={getStatusBadgeVariant(status.payment_status) as any}>{status.payment_status}</Badge>
+              <Badge variant={getStatusBadgeVariant(status.payment_status) as "default" | "secondary" | "destructive" | "outline"}>{status.payment_status}</Badge>
             </div>
           ))}
         </div>

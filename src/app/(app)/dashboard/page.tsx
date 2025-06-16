@@ -85,9 +85,9 @@ export default function DashboardPage() {
       description: "Placeholder Annual Fee Payment"
     };
     if (user) {
-      // @ts-ignore
+      // @ts-expect-error: user puede ser null y no tiene id/email en el tipado
       placeholderPaymentDetails.parentId = user.id;
-      // @ts-ignore
+      // @ts-expect-error: user puede ser null y no tiene id/email en el tipado
       placeholderPaymentDetails.parentEmail = user.email;
     }
 

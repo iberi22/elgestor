@@ -49,7 +49,7 @@ export default function PaymentsViewer() {
       console.error("Error fetching payments:", fetchError);
       setError(`Error fetching payments: ${fetchError.message}. Check console for details. Ensure RLS is set up for admins to read related tables.`)
     } else if (data) {
-      const formattedData = data.map((p: any) => ({ // Use 'any' for simplicity with Supabase joined data
+      const formattedData = data.map((p: unknown) => ({ // Use 'unknown' for simplicity with Supabase joined data
         id: p.id,
         student_name: p.students?.full_name || 'N/A',
         fee_year: p.fees?.year || 'N/A',
@@ -58,7 +58,7 @@ export default function PaymentsViewer() {
         payment_date: p.payment_date ? new Date(p.payment_date).toLocaleDateString() : 'N/A',
         transaction_id: p.transaction_id || 'N/A'
       }))
-      setPayments(formattedData)
+      setPayments(formattedData as PaymentView[])
     }
     setLoading(false)
   }
@@ -107,7 +107,7 @@ export default function PaymentsViewer() {
                   <TableCell>{payment.fee_year}</TableCell>
                   <TableCell>${payment.amount_paid.toFixed(2)}</TableCell>
                   <TableCell>
-                    <Badge variant={getStatusBadgeVariant(payment.status) as any}>{payment.status}</Badge>
+                    <Badge variant={getStatusBadgeVariant(payment.status) as unknown}>{payment.status}</Badge>
                   </TableCell>
                   <TableCell>{payment.payment_date}</TableCell>
                   <TableCell className="truncate max-w-xs">{payment.transaction_id}</TableCell>

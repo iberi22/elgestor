@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
-import { User } from '@supabase/supabase-js'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card' // Assuming Card is available
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion" // For collapsible event details
 
@@ -15,7 +14,6 @@ interface EventDisplayItem {
 }
 
 export default function EventViewer() {
-  const [user, setUser] = useState<User | null>(null)
   const [upcomingEvents, setUpcomingEvents] = useState<EventDisplayItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -28,7 +26,6 @@ export default function EventViewer() {
         // setError("User not authenticated."); // Or let dashboard handle this
         return
       }
-      setUser(currentUser)
       fetchRelevantEvents(currentUser.id)
     }
     initialize()
@@ -74,14 +71,14 @@ export default function EventViewer() {
       }
 
       // 3. Filter events relevant to the parent
-      const relevantEvents = allUpcomingEvents.filter((event: any) => {
+      const relevantEvents = allUpcomingEvents.filter((event: unknown) => {
         const isForAllParents = !event.event_recipients || event.event_recipients.length === 0
         if (isForAllParents) return true
 
-        const targetedClassIds = event.event_recipients.map((er: any) => er.class_id)
+        const targetedClassIds = event.event_recipients.map((er: unknown) => er.class_id)
         return targetedClassIds.some((targetClassId: number) => parentClassIds.includes(targetClassId))
       })
-      .map((event: any) => ({ // Map to display format
+      .map((event: { id: number; title: string; event_date: string; description?: string; }) => ({ // Map to display format
         id: event.id,
         title: event.title,
         description: event.description,
@@ -90,9 +87,9 @@ export default function EventViewer() {
 
       setUpcomingEvents(relevantEvents)
 
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error("Error fetching relevant events:", e)
-      setError(e.message)
+      setError(e instanceof Error ? e.message : 'Unknown error occurred')
     } finally {
       setLoading(false)
     }
